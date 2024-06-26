@@ -1,7 +1,6 @@
-
+import 'package:ex_sdk_matrix/my_app/home/home_screen.dart';
 import 'package:ex_sdk_matrix/overlay_window/avatar_widget.dart';
-import 'package:ex_sdk_matrix/overlay_window/chat_overlay_widget.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:ex_sdk_matrix/ulti/flutter_overlay.dart';
 import 'package:flutter/material.dart';
 
 class OverlayWindowScreen extends StatefulWidget {
@@ -17,18 +16,24 @@ class _OverlayWindowScreenState extends State<OverlayWindowScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        GestureDetector(
-            onTap: (){
-              isExpanded = !isExpanded;
-              setState(() {});
-            },
-            child: const AvatarWidget()),
-        if(isExpanded)
-          const Expanded(child: ChatWidget())
-      ],
+    return Scaffold(
+      backgroundColor: Colors.black26,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          GestureDetector(
+              onTap: (){
+                // isExpanded = !isExpanded;
+                // setState(() {});
+                FlutterOverlay.changeSize(true);
+              },
+              child: const AvatarWidget()
+          ),
+          // if(isExpanded)
+            const Expanded(child: HomeScreen())
+        ],
+      ),
     );
   }
 }
