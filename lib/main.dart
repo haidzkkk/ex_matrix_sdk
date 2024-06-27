@@ -1,4 +1,3 @@
-import 'package:ex_sdk_matrix/overlay_window/chat_overlay_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';

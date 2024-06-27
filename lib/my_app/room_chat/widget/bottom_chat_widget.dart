@@ -93,7 +93,6 @@ class _BottomChatWidgetState extends State<BottomChatWidget> with TickerProvider
       Expanded(
         child: GestureDetector(
             onTap: () async{
-              FlutterOverlay.showOverlay("alo", "123");
             },
             child: const Icon(Icons.location_on_rounded, size: 25,)
         ),
@@ -101,7 +100,6 @@ class _BottomChatWidgetState extends State<BottomChatWidget> with TickerProvider
       Expanded(
         child: GestureDetector(
             onTap: (){
-              FlutterOverlay.closeOverlay();
             },
             child: const Icon(Icons.bar_chart, size: 25,)
         ),

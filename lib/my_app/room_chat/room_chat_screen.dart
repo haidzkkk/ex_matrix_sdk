@@ -12,9 +12,10 @@ import 'package:matrix/src/voip/models/call_options.dart';
 import '../../room_call/my_voip_app.dart';
 
 class RoomChatScreen extends StatefulWidget {
-  const RoomChatScreen({super.key, required this.room});
+  const RoomChatScreen({super.key, required this.room, this.onBack});
 
   final Room room;
+  final Function()? onBack;
 
   @override
   State<RoomChatScreen> createState() => _RoomChatScreenState();
@@ -103,6 +104,15 @@ class _RoomChatScreenState extends State<RoomChatScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: GestureDetector(
+            onTap: (){
+              if(widget.onBack != null){
+                widget.onBack!();
+              }else{
+                Navigator.pop(context);
+              }
+            },
+            child: const BackButtonIcon()),
         leadingWidth: 30,
         title: Row(
           children: [

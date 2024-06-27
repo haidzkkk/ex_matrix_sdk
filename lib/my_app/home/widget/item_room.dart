@@ -8,8 +8,9 @@ import 'package:matrix/matrix.dart';
 import '../../../ulti/date_converter.dart';
 
 class ItemRoom extends StatefulWidget {
-  const ItemRoom({super.key, required this.room});
+  const ItemRoom({super.key, required this.room, this.onTap});
   final Room room;
+  final Function? onTap;
 
   @override
   State<ItemRoom> createState() => _ItemRoomState();
@@ -41,7 +42,13 @@ class _ItemRoomState extends State<ItemRoom> {
     String? url = widget.room.avatar?.getThumbnail(widget.room.client, width: 56, height: 56,).toString();
 
     return GestureDetector(
-      onTap: _join,
+      onTap: (){
+        if(widget.onTap != null){
+          widget.onTap!();
+        }else{
+           _join();
+        }
+      },
       child: Container(
         color: Colors.white,
         height: 60,
