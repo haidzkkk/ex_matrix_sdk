@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
 
+import '../../ulti/flutter_overlay.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -30,7 +32,9 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           FloatingActionButton(
             heroTag:  'unique_tag_1',
-            onPressed: (){},
+            onPressed: (){
+              FlutterOverlay.closeOverlay();
+            },
             mini: true,
             backgroundColor: Colors.white,
             child: const Icon(Icons.dashboard_outlined, color: Colors.greenAccent,),
@@ -38,7 +42,9 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 15,),
           FloatingActionButton(
             heroTag:  'unique_tag_2',
-            onPressed: (){},
+            onPressed: (){
+              FlutterOverlay.showOverlay("alo", "123");
+            },
             backgroundColor: Colors.greenAccent,
             child: const Icon(Icons.note_alt_outlined, color: Colors.white),
           ),
