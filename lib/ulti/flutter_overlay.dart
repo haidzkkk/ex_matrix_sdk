@@ -17,4 +17,13 @@ class FlutterOverlay{
       await _overlayMethodChanel.invokeMethod('stopService');
   }
 
+  static Future<bool> hasPermission() async {
+    return await _overlayMethodChanel.invokeMethod('hasPermission');
+  }
+
+  static Future<void> requestOverlayPermission() async {
+    await _overlayMethodChanel.invokeMethod('requestOverlayPermission');
+  }
+
+
 }

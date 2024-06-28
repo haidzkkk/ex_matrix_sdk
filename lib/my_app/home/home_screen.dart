@@ -35,14 +35,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed) {
+      // client.backgroundSync = true;
       FlutterOverlay.closeOverlay();
     } else if (state == AppLifecycleState.paused) {
+      // client.backgroundSync = false;
       FlutterOverlay.showOverlay("alo", "123");
     }
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,
@@ -126,6 +129,37 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       ),
                     ),
                     GestureDetector(
+                      onTap: () async{
+                        if(!(await FlutterOverlay.hasPermission())){
+                          showAlterDialog(
+                            title: "Bong bóng chat",
+                            content: "Bạn có muốn cho phép chạy dưới nền",
+                            accept: (){
+                              FlutterOverlay.requestOverlayPermission();
+                            },
+                            cancel: (){
+
+                            }
+                          );
+                        }else{
+                          showAlterDialog(
+                              title: "Bong bóng chat",
+                              content: "Bong bóng chat đã chạy dưới nền bạn có muốn tắt?",
+                              accept: (){
+                                FlutterOverlay.requestOverlayPermission();
+                              },
+                              cancel: (){
+
+                              }
+                          );
+                        }
+                      },
+                      child: const Padding(
+                          padding: EdgeInsetsDirectional.all(5),
+                          child: Icon(Icons.bubble_chart_outlined, size: 30)
+                      ),
+                    ),
+                    GestureDetector(
                       onTap: (){},
                       child: const Padding(
                           padding: EdgeInsetsDirectional.all(5),
@@ -156,9 +190,35 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
-  void resetDataClient() async{
-    await client.clear();
-    await client.clearCache();
-    client.clearArchivesFromCache();
-  }
+  void showAlterDialog({
+    required String title,
+    required String content,
+    Function? accept,
+    Function? cancel,
+}) {
+    showDialog(context: context, builder: (context){
+      return AlertDialog(
+        title: Text(title),
+        content: Text(content),
+        actions: [
+          if(cancel != null)
+            GestureDetector(
+                onTap: (){
+                  Navigator.pop(context);
+                  cancel();
+                },
+                child: const Text("Không")
+            ),
+          const SizedBox(width: 10,),
+          if(accept != null)
+            GestureDetector(
+                onTap: (){
+                  Navigator.pop(context);
+                   accept();
+                },
+                child: const Text("Có")
+            ),
+        ],
+      );
+    });}
 }

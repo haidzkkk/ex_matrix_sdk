@@ -81,6 +81,12 @@ class _ItemRoomState extends State<ItemRoom> {
                 ],
               ),
             ),
+            if(widget.room.notificationCount > 0)
+              ...[
+                const SizedBox(width: 5,),
+                Badge(label: Text(widget.room.notificationCount.toString()),),
+                const SizedBox(width: 5,),
+              ],
             Text(DateConverter.dateTimeToSinceEpochHourString(widget.room.lastEvent?.originServerTs), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400)),
             const SizedBox(width: 10,),
           ],

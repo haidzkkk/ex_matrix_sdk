@@ -1,3 +1,4 @@
+import 'package:ex_sdk_matrix/ulti/flutter_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
@@ -19,10 +20,8 @@ void main() async {
       return db;
     },
   );
-  await client.clear();
-  client.clearArchivesFromCache();
-  await client.clearCache();
   await client.init();
+  FlutterOverlay.closeOverlay();
   runApp(SplashScreen(client: client));
 }
 
@@ -42,7 +41,9 @@ void overlayMain() async{
 
   );
 
-  await client.init();
+  await client.init(
+
+  );
   runApp(
     MaterialApp(
       builder: (context, child) => Provider<Client>(
