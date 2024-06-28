@@ -8,6 +8,7 @@ import 'package:matrix/matrix_api_lite/model/auth/authentication_user_identifier
 import 'package:provider/provider.dart';
 
 import '../example/main_example.dart';
+import '../my_app/home/home_screen.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -41,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
         identifier: AuthenticationUserIdentifier(user: _usernameTextField.text),
       );
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const NavigatorScreen()),
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
             (route) => false,
       );
     } catch (e) {

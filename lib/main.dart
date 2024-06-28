@@ -19,6 +19,9 @@ void main() async {
       return db;
     },
   );
+  await client.clear();
+  client.clearArchivesFromCache();
+  await client.clearCache();
   await client.init();
   runApp(SplashScreen(client: client));
 }
@@ -38,6 +41,7 @@ void overlayMain() async{
     },
 
   );
+
   await client.init();
   runApp(
     MaterialApp(

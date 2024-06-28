@@ -5,6 +5,7 @@ import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
 
 import '../example/main_example.dart';
+import '../my_app/home/home_screen.dart';
 import 'login_screen.dart';
 import 'navigator_screen.dart';
 
@@ -21,7 +22,7 @@ class SplashScreen extends StatelessWidget {
         child: child,
       ),
       debugShowCheckedModeBanner: false,
-      home: client.isLogged() ? const NavigatorScreen() : const LoginPage(),
+      home: client.isLogged() ? const HomeScreen() : const LoginPage(),
     );
   }
 }

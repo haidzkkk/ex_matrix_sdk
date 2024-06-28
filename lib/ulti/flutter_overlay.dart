@@ -17,10 +17,4 @@ class FlutterOverlay{
       await _overlayMethodChanel.invokeMethod('stopService');
   }
 
-  static void changeSize(bool isExpanded) async {
-    var params = {
-      "isExpanded": isExpanded,
-    };
-      await _overlayMethodChanel.invokeMethod('changeSize', params);
-  }
 }

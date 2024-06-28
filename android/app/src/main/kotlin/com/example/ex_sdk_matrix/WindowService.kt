@@ -1,8 +1,10 @@
 package com.example.ex_sdk_matrix
 
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.*
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.os.Binder
@@ -10,6 +12,7 @@ import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import android.view.*
+import android.view.animation.BounceInterpolator
 import androidx.core.app.NotificationCompat
 import io.flutter.embedding.android.FlutterTextureView
 import io.flutter.embedding.android.FlutterView
@@ -51,6 +54,10 @@ class WindowService : Service() {
         }
 
         return START_STICKY
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
     }
 
     private fun handleMainFeature(title: String?, body: String?) {
@@ -118,6 +125,8 @@ class WindowService : Service() {
                         ){
                             isExpanded = true
                             changeSizeFlag()
+                        }else{
+                            calPosition()
                         }
 
                     }
@@ -134,6 +143,23 @@ class WindowService : Service() {
                 return false
             }
         })
+    }
+
+    fun calPosition(){
+        val params = (mView as FlutterView).layoutParams as WindowManager.LayoutParams
+
+        val startPos = params.x
+        val endPos = if(params.x < WindowConfig.widthScreen / 2) 0
+            else WindowConfig.widthScreen - (WindowConfig.getCollapseSize(applicationContext)["width"] ?: 0)
+
+        val animator = ValueAnimator.ofInt(startPos, endPos)
+        animator.duration = 500
+        animator.interpolator = BounceInterpolator()
+        animator.addUpdateListener { animation ->
+            params.x = animation.animatedValue as Int
+            mWindowManager.updateViewLayout(mView, params)
+        }
+        animator.start()
     }
 
     fun changeSizeFlag() {
