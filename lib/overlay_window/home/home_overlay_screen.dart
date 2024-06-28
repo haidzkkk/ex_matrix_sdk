@@ -31,7 +31,10 @@ class _HomeOverlayScreenState extends State<HomeOverlayScreen> {
     return Container(
       clipBehavior: Clip.hardEdge,
       decoration: const BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(20),)
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        )
       ),
       margin: const EdgeInsetsDirectional.all(10),
       child: currentRoom != null

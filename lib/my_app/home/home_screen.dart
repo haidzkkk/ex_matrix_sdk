@@ -14,14 +14,31 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   late final Client client;
 
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
     client = Provider.of<Client>(context, listen: false);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      FlutterOverlay.closeOverlay();
+    } else if (state == AppLifecycleState.paused) {
+      FlutterOverlay.showOverlay("alo", "123");
+    }
   }
 
   @override
@@ -33,7 +50,6 @@ class _HomeScreenState extends State<HomeScreen> {
           FloatingActionButton(
             heroTag:  'unique_tag_1',
             onPressed: (){
-              FlutterOverlay.closeOverlay();
             },
             mini: true,
             backgroundColor: Colors.white,
@@ -43,7 +59,6 @@ class _HomeScreenState extends State<HomeScreen> {
           FloatingActionButton(
             heroTag:  'unique_tag_2',
             onPressed: (){
-              FlutterOverlay.showOverlay("alo", "123");
             },
             backgroundColor: Colors.greenAccent,
             child: const Icon(Icons.note_alt_outlined, color: Colors.white),
@@ -139,5 +154,11 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  void resetDataClient() async{
+    await client.clear();
+    await client.clearCache();
+    client.clearArchivesFromCache();
   }
 }
