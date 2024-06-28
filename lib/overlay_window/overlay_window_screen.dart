@@ -25,14 +25,7 @@ class _OverlayWindowScreenState extends State<OverlayWindowScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          GestureDetector(
-              onTap: (){
-                // isExpanded = !isExpanded;
-                // setState(() {});
-                // FlutterOverlay.changeSize(true);
-              },
-              child: const AvatarWidget()
-          ),
+          const AvatarWidget(),
           if(isExpanded)
             const Expanded(child: HomeOverlayScreen())
         ],

@@ -2,13 +2,17 @@ package com.example.ex_sdk_matrix
 
 import android.app.Activity
 import android.content.Context
+import android.graphics.Color
 import android.graphics.Insets
+import android.graphics.PixelFormat
 import android.os.Build
 import android.util.DisplayMetrics
 import android.util.TypedValue
+import android.view.Gravity
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.view.WindowMetrics
+import android.widget.ImageView
 
 
 class WindowConfig {

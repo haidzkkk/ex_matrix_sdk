@@ -26,21 +26,6 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 
 class MainActivity: FlutterActivity(), MethodCallHandler{
 
-    var myService: WindowService? = null
-    var isConnect = false
-
-    private var connection = object :  ServiceConnection{
-        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            val binder = service as WindowService.MyBinder
-            myService = binder.getService()
-            isConnect = true
-        }
-
-        override fun onServiceDisconnected(name: ComponentName?) {
-            myService = null
-            isConnect = false
-        }
-    }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -66,9 +51,6 @@ class MainActivity: FlutterActivity(), MethodCallHandler{
     }
 
     private fun checkRunningService(serviceClass: Class<out Service>): Boolean{
-        if(isConnect){
-            return true
-        }
         val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         for (service in activityManager.getRunningServices(Int.MAX_VALUE)) {
             if (serviceClass.name == service.service.className) {
@@ -79,63 +61,64 @@ class MainActivity: FlutterActivity(), MethodCallHandler{
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
-        if(call.method.equals("runService")){
-            if (checkRunningService(WindowService::class.java)) {
-                result.success("Service is stated")
-            }else{
-                if(!Settings.canDrawOverlays(this)
-                ){
-                    val intent = Intent(
-                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                        Uri.parse("package:$packageName"))
-                    startActivityForResult(intent, 12312312);
-                }else{
-
-                    val title: String? = call.argument("title")
-                    val body: String? = call.argument("body")
-
-                    val bundle = Bundle().apply {
-                        putString("title", title)
-                        putString("body", body)
-                    }
-                    val intent = Intent(this, WindowService::class.java)
-                    intent.putExtra("main", bundle)
-
-                    bindService(intent, connection, Context.BIND_AUTO_CREATE)
-                    startService(intent)
-
-                    result.success("Start service success")
-                }
+        when(call.method){
+            "runService" -> {
+                runService(call, result)
+                return
             }
-        }else if(call.method.equals("stopService")){
-            if(checkRunningService(WindowService::class.java)){
-                stopService(Intent(this, WindowService::class.java))
+            "stopService" -> {
+                stopService(call, result)
+                return
             }
-
-            if(!isConnect){
-                result.success("Service stopped")
-            }else{
-                unbindService(connection)
-                isConnect = false
-                result.success("Stop service success")
+            "hasPermission" -> {
+                result.success(Settings.canDrawOverlays(this))
+                return
             }
-        }else if(call.method.equals("changeSize")){
-            Log.e("MainActivity", "changeSize");
-            if(!isConnect){
-                result.success("Service stopped")
-            }else{
-                result.success("Change size success")
+            "requestOverlayPermission" -> {
+                requestPermissionOverlay()
+                result.success("requestOverlayPermission success")
+                return
             }
-        }else if(call.method.equals("changePosition")){
-            Log.e("MainActivity", "changePosition");
-            if(!isConnect){
-                result.success("Service stopped")
-            }else{
-                result.success("Change position success")
+            else ->{
+                result.notImplemented()
             }
-        }else{
-            result.notImplemented()
         }
+    }
+
+    private fun runService(call: MethodCall, result: MethodChannel.Result){
+        if (checkRunningService(WindowService::class.java)) {
+            result.success("Service is stated")
+        }else{
+            if(Settings.canDrawOverlays(this)){
+                val title: String? = call.argument("title")
+                val body: String? = call.argument("body")
+
+                val bundle = Bundle().apply {
+                    putString("title", title)
+                    putString("body", body)
+                }
+                val intent = Intent(this, WindowService::class.java)
+                intent.putExtra("main", bundle)
+
+                startService(intent)
+
+                result.success("Start service success")
+            }
+        }
+    }
+
+    private fun stopService(call: MethodCall, result: MethodChannel.Result){
+        if(checkRunningService(WindowService::class.java)){
+            stopService(Intent(this, WindowService::class.java))
+        }
+
+    }
+
+    private fun requestPermissionOverlay(){
+        val intent = Intent(
+            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+            Uri.parse("package:$packageName"))
+        startActivityForResult(intent, 12312312);
     }
 }
 
