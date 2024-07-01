@@ -19,8 +19,6 @@ class AvatarWidget extends StatelessWidget {
             totalBadgets += room.notificationCount;
           }
 
-
-
           return Stack(
             children: [
               Container(
@@ -42,13 +40,14 @@ class AvatarWidget extends StatelessWidget {
                   },
                 ),
               ),
-              Positioned(
-                  right: 5,
-                  top: 5,
-                  child: Badge(
-                    label: Text(totalBadgets.toString()),
-                  )
-              ),
+              if(totalBadgets > 0)
+                Positioned(
+                    right: 5,
+                    top: 5,
+                    child: Badge(
+                      label: Text(totalBadgets.toString()),
+                    )
+                ),
             ],
           );
         }

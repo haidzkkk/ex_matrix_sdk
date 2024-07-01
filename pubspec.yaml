@@ -49,6 +49,7 @@ dependencies:
   permission_handler: ^11.3.1
   palette_generator: ^0.3.3+3
   flutter_webrtc: ^0.9.48
+  font_awesome_flutter: ^10.7.0
 
 dev_dependencies:
   flutter_test:
