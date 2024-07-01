@@ -103,7 +103,9 @@ class _RoomChatScreenState extends State<RoomChatScreen> {
     String imageUrl = widget.room.avatar?.getThumbnail(widget.room.client, width: 56, height: 56,).toString() ?? "";
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         leading: GestureDetector(
             onTap: (){
               if(widget.onBack != null){

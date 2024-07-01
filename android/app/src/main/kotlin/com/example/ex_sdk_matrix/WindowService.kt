@@ -215,6 +215,8 @@ class WindowService : Service() {
             this.duration = (duration ?: 500).toLong()
             this.interpolator =  animation
             this.addUpdateListener { animation ->
+                Log.e("WindowService", "PROPERTY_X: ${animation.getAnimatedValue("PROPERTY_X") as Int}")
+                Log.e("WindowService", "PROPERTY_Y: ${animation.getAnimatedValue("PROPERTY_Y") as Int}")
                 layoutParams.x = animation.getAnimatedValue("PROPERTY_X") as Int
                 layoutParams.y = animation.getAnimatedValue("PROPERTY_Y") as Int
                 if(!isStopService) mWindowManager.updateViewLayout(view, layoutParams)

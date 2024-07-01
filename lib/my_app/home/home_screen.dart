@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
 
+import '../../auth/login_screen.dart';
+import '../../search/search_screen.dart';
 import '../../ulti/flutter_overlay.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -47,6 +49,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
 
     return Scaffold(
+      backgroundColor: Colors.white,
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -78,6 +81,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               sliver: SliverSafeArea(
                 top: false,
                 sliver: SliverAppBar(
+                  backgroundColor: Colors.white,
                   collapsedHeight: 60,
                   expandedHeight: 120,
                   leading: FutureBuilder(
@@ -122,45 +126,22 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
                   actions: [
                     GestureDetector(
-                      onTap: (){},
+                      onTap: (){
+                        Navigator.push(context,
+                          PageRouteBuilder(
+                            pageBuilder: (_, __, ___) => const SearchScreen(),
+                            transitionDuration: const Duration(milliseconds: 200),
+                            transitionsBuilder: (_, a, __, child) => FadeTransition(opacity: a, child: child),
+                          ),
+                        );
+                      },
                       child: const Padding(
                           padding: EdgeInsetsDirectional.all(5),
                           child: Icon(Icons.search, size: 30,)
                       ),
                     ),
                     GestureDetector(
-                      onTap: () async{
-                        if(!(await FlutterOverlay.hasPermission())){
-                          showAlterDialog(
-                            title: "Bong bóng chat",
-                            content: "Bạn có muốn cho phép chạy dưới nền",
-                            accept: (){
-                              FlutterOverlay.requestOverlayPermission();
-                            },
-                            cancel: (){
-
-                            }
-                          );
-                        }else{
-                          showAlterDialog(
-                              title: "Bong bóng chat",
-                              content: "Bong bóng chat đã chạy dưới nền bạn có muốn tắt?",
-                              accept: (){
-                                FlutterOverlay.requestOverlayPermission();
-                              },
-                              cancel: (){
-
-                              }
-                          );
-                        }
-                      },
-                      child: const Padding(
-                          padding: EdgeInsetsDirectional.all(5),
-                          child: Icon(Icons.bubble_chart_outlined, size: 30)
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: (){},
+                      onTap: showBottomSheet,
                       child: const Padding(
                           padding: EdgeInsetsDirectional.all(5),
                           child: Icon(Icons.more_vert, size: 30)
@@ -221,4 +202,100 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         ],
       );
     });}
+
+  showBottomSheet(){
+    showModalBottomSheet(
+        context: context,
+        builder: (context){
+      return Container(
+        decoration: const BoxDecoration(),
+        padding: const EdgeInsetsDirectional.all(10),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: (){},
+              child: const Row(
+                children: [
+                  Icon(Icons.settings_suggest_outlined),
+                  SizedBox(width: 10,),
+                  Text("Cài đặt")
+                ],
+              ),
+            ),
+            const SizedBox(height: 10,),
+            GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: () async{
+                Navigator.pop(context);
+                if(!(await FlutterOverlay.hasPermission())){
+                  showAlterDialog(
+                    title: "Bong bóng chat",
+                    content: "Bạn có muốn cho phép chạy dưới nền",
+                    accept: (){
+                      FlutterOverlay.requestOverlayPermission();
+                    },
+                    cancel: (){
+
+                    }
+                  );
+                }else{
+                  showAlterDialog(
+                    title: "Bong bóng chat",
+                    content: "Bong bóng chat đã chạy dưới nền bạn có muốn tắt?",
+                    accept: (){
+                      FlutterOverlay.requestOverlayPermission();
+                    },
+                    cancel: (){
+
+                    }
+                  );
+                }
+              },
+              child: const Row(
+                children: [
+                  Icon(Icons.bubble_chart_outlined),
+                  SizedBox(width: 10,),
+                  Text("Bong bóng chat")
+                ],
+              ),
+            ),
+            const SizedBox(height: 10,),
+            GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: (){
+                Navigator.pop(context);
+                _logout();
+              },
+              child: const Row(
+                children: [
+                  Icon(Icons.logout, color: Colors.red,),
+                  SizedBox(width: 10,),
+                  Text("Đăng xuất", style: TextStyle(color: Colors.red),)
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  void _logout() async {
+    showAlterDialog(
+      title: "Đăng xuất",
+      content: "Bạn có chắc muốn đăng xuất tài khoản không?",
+      accept: ()async{
+        final client = Provider.of<Client>(context, listen: false);
+        await client.logout();
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const LoginPage()),
+              (route) => false,
+        );
+      },
+      cancel: (){}
+    );
+
+  }
 }
