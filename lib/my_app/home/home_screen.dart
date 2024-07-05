@@ -24,6 +24,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void initState() {
     WidgetsBinding.instance.addObserver(this);
     client = Provider.of<Client>(context, listen: false);
+    WidgetsBinding.instance.addPostFrameCallback((_) async{
+      if(!(await FlutterOverlay.hasPermission())){
+        showAlterDialog(
+          title: "Bong bóng chat",
+          content: "Bạn có muốn cho phép chạy dưới nền",
+          accept: (){
+            FlutterOverlay.requestOverlayPermission();
+          },
+          cancel: (){
+
+          }
+        );
+      }
+    });
     super.initState();
   }
 
@@ -37,10 +51,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed) {
-      // client.backgroundSync = true;
+      client.backgroundSync = true;
       FlutterOverlay.closeOverlay();
     } else if (state == AppLifecycleState.paused) {
-      // client.backgroundSync = false;
+      client.backgroundSync = false;
       FlutterOverlay.showOverlay("alo", "123");
     }
   }
