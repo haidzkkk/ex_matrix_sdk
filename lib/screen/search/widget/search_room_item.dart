@@ -1,13 +1,8 @@
 
-import 'package:ex_sdk_matrix/example/main_example.dart';
-import 'package:ex_sdk_matrix/my_app/room_chat/room_chat_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
-
-import '../../../ulti/date_converter.dart';
 
 class SearchRoomItem extends StatefulWidget {
   const SearchRoomItem({super.key, required this.room, this.onTap});

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:provider/provider.dart';
+import '../../data/provider/room_provider.dart';
 import 'my_voip_app.dart';
 
 class RoomCallScreen extends StatefulWidget {
@@ -20,52 +21,34 @@ class RoomCallScreen extends StatefulWidget {
 
 class _RoomCallScreenState extends State<RoomCallScreen> {
 
-  late final Client client;
-  late VoIP voip;
-  late CallSession newCall;
+  late RoomProvider roomProvider = context.read<RoomProvider>();
 
   final _localRenderer = RTCVideoRenderer();
   final _remoteRenderer = RTCVideoRenderer();
+
 
   void init() async {
     await _localRenderer.initialize();
     await _remoteRenderer.initialize();
 
-    await startCall();
-  }
-
-  startCall() async{
-    voip = VoIP(client, MyVoipApp());
-
-    newCall = await voip.inviteToCall(
-        widget.room,
-        CallType.kVideo,
-        userId: widget.remoteUserId
+    await roomProvider.startCall(
+      widget.room,
+      widget.remoteUserId ?? "",
     );
-
-    newCall.onCallStateChanged.stream.listen((state) {
-
-      _remoteRenderer.srcObject = newCall.remoteUserMediaStream?.stream;
-      setState(() { });
-    });
-
-    _localRenderer.srcObject = newCall.localUserMediaStream?.stream;
-    setState(() { });
   }
+
 
   @override
   void initState() {
-    client = Provider.of<Client>(context, listen: false);
-    super.initState();
     init();
+    super.initState();
   }
 
   @override
   void dispose() {
     _localRenderer.dispose();
     _remoteRenderer.dispose();
-    newCall.deleteAllStreams();
-    newCall.cleanUp();
+    roomProvider.endCall();
     super.dispose();
   }
 
@@ -96,7 +79,15 @@ class _RoomCallScreenState extends State<RoomCallScreen> {
               }
             ),
             Positioned.fill(
-              child: RTCVideoView(_remoteRenderer),
+              child: Selector<RoomProvider, MediaStream?>(
+                selector: (context, roomProvider) => roomProvider.remoteStream,
+                builder: (context, remoteStream, child) {
+                  if(remoteStream != null){
+                    _remoteRenderer.srcObject = remoteStream;
+                  }
+                  return RTCVideoView(_remoteRenderer);
+                }
+              ),
             ),
             Positioned(
               top: 90,
@@ -104,7 +95,15 @@ class _RoomCallScreenState extends State<RoomCallScreen> {
               child: SizedBox(
                   height: 100,
                   width: 100,
-                  child: RTCVideoView(_localRenderer)
+                  child: Selector<RoomProvider, MediaStream?>(
+                    selector: (context, roomProvider) => roomProvider.localStream,
+                    builder: (context, localStream, child) {
+                      if(localStream != null){
+                        _localRenderer.srcObject = localStream;
+                      }
+                      return RTCVideoView(_localRenderer);
+                    }
+                  )
               ),
             ),
             Container(

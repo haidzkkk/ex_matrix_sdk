@@ -1,11 +1,12 @@
 
-import 'package:ex_sdk_matrix/example/main_example.dart';
-import 'package:ex_sdk_matrix/my_app/room_chat/room_chat_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
+import 'package:provider/provider.dart';
 
+import '../../../data/provider/home_provider.dart';
 import '../../../ulti/date_converter.dart';
+import '../../room_chat/room_chat_screen.dart';
 
 class ItemRoom extends StatefulWidget {
   const ItemRoom({super.key, required this.room, this.onTap});
@@ -18,16 +19,14 @@ class ItemRoom extends StatefulWidget {
 
 class _ItemRoomState extends State<ItemRoom> {
 
-  late String myUserId;
+
+  late HomeProvider authProvider = context.read<HomeProvider>();
 
   void _join() async{
-    if (widget.room.membership != Membership.join) {
-      await widget.room.join();
-    }
+    await authProvider.joinRoom(widget.room);
     Navigator.push(context,
       MaterialPageRoute(
         builder: (_) => RoomChatScreen(room: widget.room),
-        // builder: (_) => RoomPage(room: widget.room),
       ),
     );
   }

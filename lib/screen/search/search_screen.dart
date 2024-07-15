@@ -1,13 +1,11 @@
 
-
-import 'package:ex_sdk_matrix/search/widget/search_room_item.dart';
+import 'package:ex_sdk_matrix/screen/search/widget/search_room_item.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
-
-import '../my_app/room_chat/room_chat_screen.dart';
+import '../room_chat/room_chat_screen.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});

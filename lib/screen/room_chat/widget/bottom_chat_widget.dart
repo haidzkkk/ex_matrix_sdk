@@ -1,20 +1,17 @@
-
-import 'dart:isolate';
 import 'dart:ui';
-
-import 'package:ex_sdk_matrix/my_app/room_chat/widget/text_field_custom.dart';
-import 'package:ex_sdk_matrix/ulti/flutter_overlay.dart';
+import 'package:ex_sdk_matrix/screen/room_chat/widget/text_field_custom.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:matrix/matrix.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
+
+import '../../../data/provider/room_provider.dart';
 
 class BottomChatWidget extends StatefulWidget {
-  const BottomChatWidget({super.key, required this.room});
-  final Room room;
+  const BottomChatWidget({super.key});
 
   @override
   State<BottomChatWidget> createState() => _BottomChatWidgetState();
@@ -26,25 +23,15 @@ class _BottomChatWidgetState extends State<BottomChatWidget> with TickerProvider
   late AnimationController animationOptionCtrl;
   late Animation<double> animationOption;
 
+
+  late RoomProvider roomProvider = context.read<RoomProvider>();
+
   RxBool isShowOption = false.obs;
   RxBool isSend = false.obs;
 
   void _send() {
-    widget.room.sendTextEvent(messageTextCtrl.text.trim());
+    roomProvider.sendTextMessage(messageTextCtrl.text.trim());
     messageTextCtrl.clear();
-  }
-
-  Future<void> _gallery(ImageSource source) async {
-    if(source == ImageSource.camera && await Permission.camera.request().isDenied){
-      return;
-    }
-
-    final XFile? image = await ImagePicker().pickImage(source: source);
-    if(image == null) return;
-
-    var bytes = await image.readAsBytes();
-    MatrixFile matrixFile = MatrixFile(bytes: bytes, name: DateTime.now().millisecondsSinceEpoch.toString());
-    widget.room.sendFileEvent(matrixFile,);
   }
 
   @override
@@ -56,7 +43,7 @@ class _BottomChatWidgetState extends State<BottomChatWidget> with TickerProvider
     animationOption = Tween(begin: 0.0, end: 3.14 / 4 * 3).animate(animationOptionCtrl);
 
     messageTextCtrl.addListener(() {
-      widget.room.setTyping(messageTextCtrl.text.isNotEmpty);
+      roomProvider.setTyping = messageTextCtrl.text.isNotEmpty;
       isSend.value = messageTextCtrl.text.isNotEmpty;
     });
 
@@ -77,7 +64,7 @@ class _BottomChatWidgetState extends State<BottomChatWidget> with TickerProvider
       Expanded(
         child: GestureDetector(
             onTap: (){
-              _gallery(ImageSource.gallery);
+              roomProvider.sendImage(ImageSource.gallery);
             },
             child: const Icon(Icons.image, size: 25,)
         ),
@@ -85,7 +72,7 @@ class _BottomChatWidgetState extends State<BottomChatWidget> with TickerProvider
       Expanded(
         child: GestureDetector(
             onTap: (){
-              _gallery(ImageSource.camera);
+              roomProvider.sendImage(ImageSource.camera);
             },
             child: const Icon(Icons.camera_alt, size: 25,)
         ),

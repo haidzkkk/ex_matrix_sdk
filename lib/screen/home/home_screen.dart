@@ -1,13 +1,15 @@
 
-import 'package:ex_sdk_matrix/my_app/home/widget/item_room.dart';
+import 'package:ex_sdk_matrix/data/provider/home_provider.dart';
+import 'package:ex_sdk_matrix/screen/home/widget/item_room.dart';
+import 'package:ex_sdk_matrix/ulti/client_extension.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
 
-import '../../auth/login_screen.dart';
-import '../../search/search_screen.dart';
 import '../../ulti/flutter_overlay.dart';
+import '../auth/login_screen.dart';
+import '../search/search_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,12 +20,11 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
-  late final Client client;
+  late HomeProvider homeProvider = context.read<HomeProvider>();
 
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
-    client = Provider.of<Client>(context, listen: false);
     WidgetsBinding.instance.addPostFrameCallback((_) async{
       if(!(await FlutterOverlay.hasPermission())){
         showAlterDialog(
@@ -38,6 +39,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         );
       }
     });
+    homeProvider.getCurrentUser();
+    homeProvider.onSyncRoomChat();
     super.initState();
   }
 
@@ -51,10 +54,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed) {
-      client.backgroundSync = true;
+      // client.backgroundSync = true;
       FlutterOverlay.closeOverlay();
     } else if (state == AppLifecycleState.paused) {
-      client.backgroundSync = false;
+      // client.backgroundSync = false;
       FlutterOverlay.showOverlay("alo", "123");
     }
   }
@@ -98,9 +101,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   backgroundColor: Colors.white,
                   collapsedHeight: 60,
                   expandedHeight: 120,
-                  leading: FutureBuilder(
-                    future: client.getProfileFromUserId(client.userID ?? ""),
-                    builder: (context, snapshot) {
+                  leading: Consumer<HomeProvider>(
+                    builder: (context, _, child) {
                       return Container(
                         width: 30,
                         height: 30,
@@ -112,9 +114,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         ),
                         margin: const EdgeInsetsDirectional.all(10),
                         child: Image.network(
-                          snapshot.data?.avatarUrl?.getThumbnail(client, width: 56, height: 56,).toString() ?? "",
+                          homeProvider.profile?.getAvatarUrl(homeProvider.client) ?? "",
                           errorBuilder: (_, __, ___){
-                            return Text(snapshot.data?.displayName?.split('').first.toUpperCase() ?? "",
+                            return Text(homeProvider.profile?.getFirstCharacterDisplayName ?? "",
                               style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500),
                             );
                           },
@@ -167,18 +169,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             )
           ];
         },
-        body: StreamBuilder(
-          stream: client.onSync.stream,
-          builder: (context, asyncSnapShot){
-            return ListView.separated(
-                itemCount: client.rooms.length,
-                itemBuilder: (context, index){
-                  return ItemRoom(
-                    room: client.rooms[index],
-                  );
-                },
-                separatorBuilder: (context, index) => const SizedBox(height: 10,)
-            );
+        body: Consumer<HomeProvider>(
+            builder: (context, _, child) {
+              return ListView.separated(
+                  itemCount: homeProvider.rooms.length,
+                  itemBuilder: (context, index){
+                    return ItemRoom(
+                      room: homeProvider.rooms[index],
+                    );
+                  },
+                  separatorBuilder: (context, index) => const SizedBox(height: 10,)
+              );
           },
         ),
       ),
@@ -301,8 +302,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       title: "Đăng xuất",
       content: "Bạn có chắc muốn đăng xuất tài khoản không?",
       accept: ()async{
-        final client = Provider.of<Client>(context, listen: false);
-        await client.logout();
+        await homeProvider.client.logout();
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const LoginPage()),
               (route) => false,
@@ -310,6 +310,5 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       },
       cancel: (){}
     );
-
   }
 }
