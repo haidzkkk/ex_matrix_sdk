@@ -1,16 +1,12 @@
 
-import 'package:ex_sdk_matrix/auth/navigator_screen.dart';
-import 'package:ex_sdk_matrix/auth/widget/button_border.dart';
+import 'package:ex_sdk_matrix/screen/auth/widget/button_border.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:matrix/matrix.dart';
-import 'package:matrix/matrix_api_lite/generated/model.dart';
-import 'package:matrix/matrix_api_lite/model/auth/authentication_user_identifier.dart';
 import 'package:provider/provider.dart';
 
-import '../example/main_example.dart';
-import '../my_app/home/home_screen.dart';
+import '../../data/provider/auth_provider.dart';
+import '../home/home_screen.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -21,7 +17,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _homeserverTextField = TextEditingController(
-    text: 'matrix.org',
+    text: AuthProvider.DEFAULT_HOMESERVER,
   );
   final TextEditingController _usernameTextField = TextEditingController();
   final TextEditingController _passwordTextField = TextEditingController();
@@ -30,36 +26,7 @@ class _LoginPageState extends State<LoginPage> {
   final FocusNode _usernameFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
 
-  bool _loading = false;
-  bool _showPass = false;
-
-  void _login() async {
-    _homeserverFocusNode.unfocus();
-    _usernameFocusNode.unfocus();
-    _passwordFocusNode.unfocus();
-
-    setState(() {
-      _loading = true;
-    });
-
-    try {
-      final client = Provider.of<Client>(context, listen: false);
-      await client.checkHomeserver(Uri.https(_homeserverTextField.text.trim(), ''));
-      await client.login(
-        LoginType.mLoginPassword,
-        password: _passwordTextField.text,
-        identifier: AuthenticationUserIdentifier(user: _usernameTextField.text),
-      );
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const HomeScreen()), (route) => false,);
-
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()),),);
-      setState(() {
-        _loading = false;
-      });
-    }
-  }
+  late AuthProvider authProvider = context.read<AuthProvider>();
 
   @override
   void dispose() {
@@ -82,15 +49,18 @@ class _LoginPageState extends State<LoginPage> {
             child: ListView(
               children: [
                 const SizedBox(height: 30,),
-                const Align(
-                  alignment: Alignment.center,
-                  child: Text("Welcome back!", style: TextStyle(letterSpacing: 2, color: Colors.black, fontSize: 24, fontWeight: FontWeight.bold),)
+                Consumer<AuthProvider>(
+                  builder: (context, provider, child) {
+                    return const Align(
+                      alignment: Alignment.center,
+                      child: Text("Welcome back!", style: TextStyle(letterSpacing: 2, color: Colors.black, fontSize: 24, fontWeight: FontWeight.bold),)
+                    );
+                  }
                 ),
                 const SizedBox(height: 30,),
                 TextFormField(
                   controller: _homeserverTextField,
                   focusNode: _homeserverFocusNode,
-                  readOnly: _loading,
                   autocorrect: false,
                   cursorColor: Colors.teal,
                   decoration: const InputDecoration(
@@ -107,7 +77,6 @@ class _LoginPageState extends State<LoginPage> {
                 TextFormField(
                   controller: _usernameTextField,
                   focusNode: _usernameFocusNode,
-                  readOnly: _loading,
                   cursorColor: Colors.teal,
                   decoration: const InputDecoration(
                     label: Text("Username/Email/Phone"),
@@ -119,26 +88,31 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 const SizedBox(height: 20,),
-                TextFormField(
-                  controller: _passwordTextField,
-                  focusNode: _passwordFocusNode,
-                  readOnly: _loading,
-                  obscureText: !_showPass,
-                  cursorColor: Colors.teal,
-                  decoration: InputDecoration(
-                    label: const Text("Password"),
-                    suffixIcon: GestureDetector(
-                        onTap: (){
-                          setState(() {_showPass = !_showPass;});
-                        },
-                        child: Icon(_showPass ? Icons.visibility : Icons.visibility_off,)
-                    ),
-                    floatingLabelStyle: const TextStyle(color: Colors.teal),
-                    focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.teal, width: 2, strokeAlign: 10),
-                    ),
-                    border: const OutlineInputBorder(),
-                  ),
+                Selector<AuthProvider, bool>(
+                  selector: (context, provider) => provider.showPass,
+                  builder: (context, result, child){
+                    print("build password");
+                    return TextFormField(
+                      controller: _passwordTextField,
+                      focusNode: _passwordFocusNode,
+                      cursorColor: Colors.teal,
+                      obscureText: !result,
+                      decoration: InputDecoration(
+                        label: const Text("Password"),
+                        suffixIcon: GestureDetector(
+                            onTap: (){
+                              authProvider.changeShowPass();
+                            },
+                            child: Icon(authProvider.showPass ? Icons.visibility : Icons.visibility_off,)
+                        ),
+                        floatingLabelStyle: const TextStyle(color: Colors.teal),
+                        focusedBorder: const OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.teal, width: 2, strokeAlign: 10),
+                        ),
+                        border: const OutlineInputBorder(),
+                      ),
+                    );
+                  }
                 ),
                 const SizedBox(height: 20,),
                 const Align(
@@ -148,6 +122,7 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: 20,),
                 ElevatedButton(
                     style: ElevatedButton.styleFrom(
+                      shape: const RoundedRectangleBorder(borderRadius: BorderRadiusDirectional.all(Radius.circular(10))),
                         minimumSize: const Size(double.infinity, 50),
                         backgroundColor: Colors.teal,
                     ),
@@ -203,15 +178,37 @@ class _LoginPageState extends State<LoginPage> {
               ],
             ),
           ),
-          if(_loading)
-            Container(
-              color: Colors.white.withOpacity(0.5),
-              child: const Center(child: CircularProgressIndicator(
-                color: Colors.teal,
-              )),
-            ),
+          Selector<AuthProvider, bool>(
+              selector: (context, provider) => provider.loading,
+              builder: (context, result, child){
+                print("build loading");
+                if(!authProvider.loading) return const SizedBox();
+                return Container(
+                    color: Colors.white.withOpacity(0.5),
+                  child: const Center(child: CircularProgressIndicator(
+                    color: Colors.teal,
+                  )),
+                );
+          }),
         ],
       ),
     );
+  }
+
+  void _login() async{
+    _homeserverFocusNode.unfocus();
+    _usernameFocusNode.unfocus();
+    _passwordFocusNode.unfocus();
+
+    authProvider.login(
+        homeServer: _homeserverTextField.text,
+        username: _usernameTextField.text,
+        password: _passwordTextField.text
+    ).then((value){
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const HomeScreen()), (route) => false,);
+    }).catchError((err){
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err.toString()),),);
+    });
   }
 }

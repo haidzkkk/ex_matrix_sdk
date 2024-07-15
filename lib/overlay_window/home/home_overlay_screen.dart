@@ -1,11 +1,10 @@
-
-import 'package:ex_sdk_matrix/my_app/home/widget/item_room.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
 
-import '../../my_app/room_chat/room_chat_screen.dart';
+import '../../screen/home/widget/item_room.dart';
+import '../../screen/room_chat/room_chat_screen.dart';
 import '../../ulti/flutter_overlay.dart';
 
 class HomeOverlayScreen extends StatefulWidget {

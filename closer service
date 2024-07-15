@@ -1,0 +1,56 @@
+[33mcommit 1ee67958c221f15300fecde89265d07006568d9a[m[33m ([m[1;36mHEAD -> [m[1;32mdev[m[33m, [m[1;31morigin/dev[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Merge: 116bcb1 60381e3
+Author: haidzkkk <117186588+haidzkkk@users.noreply.github.com>
+Date:   Fri Jun 28 18:08:59 2024 +0700
+
+    Merge pull request #3 from haidzkkk/close_service
+    
+    Close service, refactor service
+
+[33mcommit 60381e349b58251740fb5d72e40e1031d7993e00[m[33m ([m[1;31morigin/close_service[m[33m, [m[1;32mclose_service[m[33m)[m
+Author: Kantun <bekoi10a6@gmail.com>
+Date:   Fri Jun 28 18:07:07 2024 +0700
+
+    Close service, refactor service
+
+[33mcommit 116bcb1896f0fd37740ee6a3260773735ffa6332[m
+Merge: d8efe13 06a890a
+Author: haidzkkk <117186588+haidzkkk@users.noreply.github.com>
+Date:   Fri Jun 28 09:43:05 2024 +0700
+
+    Merge pull request #2 from haidzkkk/fixbug/service
+    
+    fix out of memory between service and app flutter, caculation positio…
+
+[33mcommit 06a890adf2b1c63c22368b172e1cdeaa95ad231c[m[33m ([m[1;31morigin/fixbug/service[m[33m, [m[1;32mfixbug/service[m[33m)[m
+Author: Kantun <bekoi10a6@gmail.com>
+Date:   Fri Jun 28 09:42:01 2024 +0700
+
+    fix out of memory between service and app flutter, caculation position overlay window
+
+[33mcommit d8efe1304848e00eed448fd6bb1c777e8de43dfd[m
+Merge: f0b2a8b ac1181b
+Author: haidzkkk <117186588+haidzkkk@users.noreply.github.com>
+Date:   Thu Jun 27 15:41:55 2024 +0700
+
+    Merge pull request #1 from haidzkkk/service_native
+    
+    Service native
+
+[33mcommit ac1181b4e0a383756d806d2b75a5677595e72571[m[33m ([m[1;31morigin/service_native[m[33m, [m[1;32mservice_native[m[33m)[m
+Author: Kantun <bekoi10a6@gmail.com>
+Date:   Thu Jun 27 15:38:58 2024 +0700
+
+    create window screen chat with window manager
+
+[33mcommit f8fa8d3099b4031b87485ea3df87f9814da3123e[m
+Author: Kantun <bekoi10a6@gmail.com>
+Date:   Wed Jun 26 10:25:34 2024 +0700
+
+    test
+
+[33mcommit f0b2a8ba1f8a78b0b766d64d1eb02df52772197f[m
+Author: Kantun <bekoi10a6@gmail.com>
+Date:   Mon Jun 24 11:34:31 2024 +0700
+
+    first

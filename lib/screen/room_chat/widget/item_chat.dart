@@ -1,22 +1,34 @@
+import 'package:ex_sdk_matrix/ulti/client_extension.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:matrix/matrix.dart';
+import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../ulti/date_converter.dart';
+
+class ItemChatProvider extends ChangeNotifier{
+  bool isTabItem = false;
+
+  changeTabItem(){
+    isTabItem = !isTabItem;
+    notifyListeners();
+  }
+}
 
 class ItemChat extends StatefulWidget {
   const ItemChat({
     super.key,
     required this.data,
     required this.typeMe,
+    required this.latter,
     required this.showInfo,
     required this.showTimer,
   });
 
   final bool typeMe;
   final bool showInfo;
+  final bool latter;
   final bool showTimer;
   final Event data;
 
@@ -30,6 +42,8 @@ class _ItemChatState extends State<ItemChat> {
   EdgeInsetsGeometry padding = const EdgeInsets.only(left: 35, right: 7, bottom: 7);
 
   VideoPlayerController? videoPlayerController;
+
+  late ItemChatProvider itemChatProvider;
 
   @override
   void initState() {
@@ -45,27 +59,54 @@ class _ItemChatState extends State<ItemChat> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: widget.typeMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-      children: [
+    return ChangeNotifierProvider<ItemChatProvider>(
+      create: (BuildContext context) =>  ItemChatProvider(),
+      child: Builder(
+        builder: (context) {
+          itemChatProvider = context.read<ItemChatProvider>();
 
-        if(widget.showTimer) timerWidget(),
-        if((widget.showTimer || widget.showInfo) && !widget.typeMe) infoWidget(),
-        Container(
-            margin: padding,
-            clipBehavior: Clip.hardEdge,
-            decoration: const BoxDecoration(
-              borderRadius: BorderRadiusDirectional.all(Radius.circular(10))
-            ),
-            child: contentWidget()
-        ),
-        // if(widget.data.statusLocal == MessageStatusLocal.sending || widget.data.statusLocal == MessageStatusLocal.sentFail)
-        //   Padding(
-        //     padding: padding,
-        //     child: Text(widget.data.statusLocal == MessageStatusLocal.sending ? "Đang giử" : "Giử thất bại",
-        //       style: const TextStyle(fontSize: 8),),
-        //   ),
-      ],
+          return Column(
+            crossAxisAlignment: widget.typeMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            children: [
+
+              if(widget.showTimer) timerWidget(),
+              if((widget.showTimer || widget.showInfo) && !widget.typeMe) infoWidget(),
+              Container(
+                  margin: padding,
+                  clipBehavior: Clip.hardEdge,
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadiusDirectional.all(Radius.circular(10))
+                  ),
+                  child: contentWidget()
+              ),
+              Selector<ItemChatProvider, bool>(
+                selector: (context, itemChatProvider) => itemChatProvider.isTabItem,
+                builder: (context, isTab, child){
+                  if(itemChatProvider.isTabItem
+                      || widget.data.status == EventStatus.sending
+                      || widget.data.status == EventStatus.error
+                  ){
+
+                    return Padding(
+                      padding: padding,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(widget.data.status.getString(), style: const TextStyle(fontSize: 8),),
+                          const SizedBox(width: 5,),
+                          Text(DateConverter.dateTimeSinceEpochHourString(widget.data.originServerTs), style: const TextStyle(fontSize: 8, fontWeight: FontWeight.w400), ),
+                        ],
+                      ),
+                    );
+                  }
+                  return const SizedBox();
+                },
+              )
+
+            ],
+          );
+        }
+      ),
     );
   }
 
@@ -167,6 +208,7 @@ class _ItemChatState extends State<ItemChat> {
       //   return Text("MessageType.create");
       // }
     }
+
     return SizedBox(
         height: 40,
         child: Text(widget.data.type)
@@ -178,9 +220,14 @@ class _ItemChatState extends State<ItemChat> {
       case MessageTypes.Text: {
         return Material(
           color: Colors.black.withOpacity(0.1),
-          child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              child: Text(widget.data.body)),
+          child: GestureDetector(
+            onTap: (){
+              itemChatProvider.changeTabItem();
+            },
+            child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                child: Text(widget.data.body)),
+          ),
         );
       }
       case MessageTypes.Video: {
