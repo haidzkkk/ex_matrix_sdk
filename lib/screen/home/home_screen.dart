@@ -1,15 +1,14 @@
 
+import 'package:ex_sdk_matrix/data/provider/auth_provider.dart';
 import 'package:ex_sdk_matrix/data/provider/home_provider.dart';
 import 'package:ex_sdk_matrix/screen/home/widget/item_room.dart';
-import 'package:ex_sdk_matrix/ulti/client_extension.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
-
-import '../../ulti/flutter_overlay.dart';
+import '../../ultis/flutter_overlay.dart';
 import '../auth/login_screen.dart';
 import '../search/search_screen.dart';
+import '../../ultis/client_extension.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,6 +19,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
+  late AuthProvider authProvider = context.read<AuthProvider>();
   late HomeProvider homeProvider = context.read<HomeProvider>();
 
   @override
@@ -302,7 +302,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       title: "Đăng xuất",
       content: "Bạn có chắc muốn đăng xuất tài khoản không?",
       accept: ()async{
-        await homeProvider.client.logout();
+        await authProvider.logout();
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const LoginPage()),
               (route) => false,

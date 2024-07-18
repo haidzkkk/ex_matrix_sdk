@@ -31,14 +31,13 @@ class MainActivity: FlutterActivity(), MethodCallHandler{
         super.configureFlutterEngine(flutterEngine)
 
         WindowConfig.getSizeScreen(context)
-        setViewFromFlutter()
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
             AppConstants.METHOD_CHANNEL
         ).setMethodCallHandler(this)
     }
 
-    private fun setViewFromFlutter() {
+    private fun setViewFromFlutterEngineCache() {
         if(FlutterEngineCache.getInstance().get(AppConstants.CACHED_TAG) == null){
             val enn = FlutterEngineGroup(context)
             val dEntry = DartEntrypoint(
@@ -47,6 +46,12 @@ class MainActivity: FlutterActivity(), MethodCallHandler{
             )
             val engine = enn.createAndRunEngine(context, dEntry)
             FlutterEngineCache.getInstance().put(AppConstants.CACHED_TAG, engine)
+        }
+    }
+
+    private fun removeViewFromFlutterEngineCache() {
+        if(FlutterEngineCache.getInstance().get(AppConstants.CACHED_TAG) != null){
+            FlutterEngineCache.getInstance().remove(AppConstants.CACHED_TAG)
         }
     }
 
@@ -63,10 +68,12 @@ class MainActivity: FlutterActivity(), MethodCallHandler{
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when(call.method){
             "runService" -> {
+                setViewFromFlutterEngineCache()
                 runService(call, result)
                 return
             }
             "stopService" -> {
+                removeViewFromFlutterEngineCache()
                 stopService(call, result)
                 return
             }

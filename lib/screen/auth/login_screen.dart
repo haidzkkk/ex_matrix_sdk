@@ -1,5 +1,6 @@
 
 import 'package:ex_sdk_matrix/screen/auth/widget/button_border.dart';
+import 'package:ex_sdk_matrix/ultis/app_constants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -17,7 +18,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _homeserverTextField = TextEditingController(
-    text: AuthProvider.DEFAULT_HOMESERVER,
+    text: AppConstants.DEFAULT_HOMESERVER,
   );
   final TextEditingController _usernameTextField = TextEditingController();
   final TextEditingController _passwordTextField = TextEditingController();
