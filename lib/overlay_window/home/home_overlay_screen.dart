@@ -1,11 +1,12 @@
+import 'package:ex_sdk_matrix/ultis/client_extension.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
 
+import '../../data/provider/home_provider.dart';
 import '../../screen/home/widget/item_room.dart';
 import '../../screen/room_chat/room_chat_screen.dart';
-import '../../ulti/flutter_overlay.dart';
 
 class HomeOverlayScreen extends StatefulWidget {
   const HomeOverlayScreen({super.key});
@@ -16,12 +17,11 @@ class HomeOverlayScreen extends StatefulWidget {
 
 class _HomeOverlayScreenState extends State<HomeOverlayScreen> {
 
-  late final Client client;
+  late HomeProvider homeProvider = context.read<HomeProvider>();
   Room? currentRoom;
 
   @override
   void initState() {
-    client = Provider.of<Client>(context, listen: false);
     super.initState();
   }
 
@@ -53,38 +53,32 @@ class _HomeOverlayScreenState extends State<HomeOverlayScreen> {
                 fontWeight: FontWeight.w500
             ),
           ),
-          leading: FutureBuilder(
-              future: client.getProfileFromUserId(client.userID ?? ""),
-              builder: (context, snapshot) {
-                return Container(
-                  width: 30,
-                  height: 30,
-                  alignment: Alignment.center,
-                  clipBehavior: Clip.hardEdge,
-                  decoration: const BoxDecoration(
-                      color: Colors.teal,
-                      borderRadius: BorderRadius.all(Radius.circular(100))
-                  ),
-                  margin: const EdgeInsetsDirectional.all(10),
-                  child: Image.network(
-                    snapshot.data?.avatarUrl?.getThumbnail(client, width: 56, height: 56,).toString() ?? "",
-                    errorBuilder: (_, __, ___){
-                      return Text(snapshot.data?.displayName?.split('').first.toUpperCase() ?? "",
-                        style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500),
-                      );
-                    },
-                  ),
+          leading: Container(
+            width: 30,
+            height: 30,
+            alignment: Alignment.center,
+            clipBehavior: Clip.hardEdge,
+            decoration: const BoxDecoration(
+                color: Colors.teal,
+                borderRadius: BorderRadius.all(Radius.circular(100))
+            ),
+            margin: const EdgeInsetsDirectional.all(10),
+            child: Image.network(
+              homeProvider.profile?.getAvatarUrl(homeProvider.client) ?? "",
+              errorBuilder: (_, __, ___){
+                return Text(homeProvider.profile?.getFirstCharacterDisplayName ?? "",
+                  style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500),
                 );
-              }
+              },
+            ),
           ),
         ),
-        body: StreamBuilder(
-          stream: client.onSync.stream,
-          builder: (context, asyncSnapShot){
+        body: Consumer<HomeProvider>(
+          builder: (context, _, child) {
             return ListView.separated(
-                itemCount: client.rooms.length,
+                itemCount: homeProvider.rooms.length,
                 itemBuilder: (context, index){
-                  var itemRoom = client.rooms[index];
+                  var itemRoom = homeProvider.rooms[index];
                   return ItemRoom(
                     room: itemRoom,
                     onTap: () async{

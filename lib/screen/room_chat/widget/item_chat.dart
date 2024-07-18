@@ -1,11 +1,11 @@
-import 'package:ex_sdk_matrix/ulti/client_extension.dart';
+import 'package:ex_sdk_matrix/ultis/client_extension.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
-import '../../../ulti/date_converter.dart';
+import '../../../ultis/date_converter.dart';
 
 class ItemChatProvider extends ChangeNotifier{
   bool isTabItem = false;

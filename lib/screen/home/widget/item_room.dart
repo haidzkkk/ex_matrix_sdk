@@ -5,7 +5,7 @@ import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
 
 import '../../../data/provider/home_provider.dart';
-import '../../../ulti/date_converter.dart';
+import '../../../ultis/date_converter.dart';
 import '../../room_chat/room_chat_screen.dart';
 
 class ItemRoom extends StatefulWidget {
