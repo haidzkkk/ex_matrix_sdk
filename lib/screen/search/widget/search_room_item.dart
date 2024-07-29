@@ -1,8 +1,9 @@
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
+
+import '../../../data/provider/home_provider.dart';
 
 class SearchRoomItem extends StatefulWidget {
   const SearchRoomItem({super.key, required this.room, this.onTap});
@@ -15,18 +16,17 @@ class SearchRoomItem extends StatefulWidget {
 
 class _SearchRoomItemState extends State<SearchRoomItem> {
 
-  late final Client client;
+  late HomeProvider homeProvider = context.read<HomeProvider>();
 
   @override
   void initState() {
-    client = Provider.of<Client>(context, listen: false);
     super.initState();
   }
 
 
   @override
   Widget build(BuildContext context) {
-    String? url = widget.room.avatarUrl?.getThumbnail(client, width: 56, height: 56,).toString();
+    String? url = widget.room.avatarUrl?.getThumbnail(homeProvider.client, width: 56, height: 56,).toString();
 
     return GestureDetector(
       onTap: (){
@@ -65,7 +65,7 @@ class _SearchRoomItemState extends State<SearchRoomItem> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(widget.room.displayName ?? "", maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 16),),
-                  Text(widget.room.userId ?? 'No messages', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400)),
+                  Text(widget.room.userId, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400)),
                 ],
               ),
             ),

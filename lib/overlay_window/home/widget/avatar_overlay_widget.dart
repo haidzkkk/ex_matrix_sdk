@@ -4,14 +4,16 @@ import 'package:ex_sdk_matrix/ultis/client_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class AvatarWidget extends StatefulWidget {
-  const AvatarWidget({super.key});
+import '../../../screen/widget/avatar_widget.dart';
+
+class AvatarOverlayWidget extends StatefulWidget {
+  const AvatarOverlayWidget({super.key});
 
   @override
-  State<AvatarWidget> createState() => _AvatarWidgetState();
+  State<AvatarOverlayWidget> createState() => _AvatarOverlayWidgetState();
 }
 
-class _AvatarWidgetState extends State<AvatarWidget> {
+class _AvatarOverlayWidgetState extends State<AvatarOverlayWidget> {
   late HomeProvider homeProvider = context.read<HomeProvider>();
 
   @override
@@ -25,24 +27,10 @@ class _AvatarWidgetState extends State<AvatarWidget> {
                 duration: const Duration(milliseconds: 200),
                 child: avatarUrl.isEmpty
                   ? null
-                  : Container(
-                    width: 60,
-                    height: 60,
-                    alignment: Alignment.center,
-                    clipBehavior: Clip.hardEdge,
-                    decoration: const BoxDecoration(
-                        color: Colors.teal,
-                        borderRadius: BorderRadius.all(Radius.circular(100))
-                    ),
-                    margin: const EdgeInsetsDirectional.all(5),
-                    child: Image.network(
-                      homeProvider.profile?.getAvatarUrl(homeProvider.client) ?? "",
-                      errorBuilder: (_, __, ___){
-                        return Text(homeProvider.profile?.getFirstCharacterDisplayName ?? "",
-                          style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500),
-                        );
-                      },
-                    ),
+                  : AvatarWidget(
+                     size: 60,
+                     avatarUrl: homeProvider.profile?.getAvatarUrl(homeProvider.client) ?? "",
+                     displayName: homeProvider.profile?.displayName ?? ""
                   ),
               );
           }

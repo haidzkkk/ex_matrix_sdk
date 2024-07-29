@@ -1,3 +1,5 @@
+import 'package:ex_sdk_matrix/screen/widget/avatar_widget.dart';
+import 'package:ex_sdk_matrix/screen/widget/image_widget.dart';
 import 'package:ex_sdk_matrix/ultis/client_extension.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -5,7 +7,9 @@ import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../../data/model/slide.dart';
 import '../../../ultis/date_converter.dart';
+import '../../../ultis/utils.dart';
 
 class ItemChatProvider extends ChangeNotifier{
   bool isTabItem = false;
@@ -41,20 +45,11 @@ class _ItemChatState extends State<ItemChat> {
   EdgeInsetsGeometry paddingItem = const EdgeInsets.symmetric(horizontal: 7, vertical: 7);
   EdgeInsetsGeometry padding = const EdgeInsets.only(left: 35, right: 7, bottom: 7);
 
-  VideoPlayerController? videoPlayerController;
-
   late ItemChatProvider itemChatProvider;
 
   @override
   void initState() {
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    videoPlayerController?.pause();
-    videoPlayerController?.dispose();
-    super.dispose();
   }
 
   @override
@@ -137,13 +132,10 @@ class _ItemChatState extends State<ItemChat> {
       padding: paddingItem,
       child: Row(
         children: [
-          Container(
-            width: 20,
-            height: 20,
-            decoration: const BoxDecoration(
-                color: Colors.pinkAccent,
-                borderRadius: BorderRadius.all(Radius.circular(100))
-            ),
+          AvatarWidget(
+            size: 20,
+            avatarUrl: widget.data.attachmentMxcUrl.toString(),
+            displayName: widget.data.senderFromMemoryOrFallback.displayName ?? "",
           ),
           const SizedBox(width: 7,),
           Text(widget.data.senderFromMemoryOrFallback.displayName ?? "", style: const TextStyle(color: Colors.pinkAccent),),
@@ -231,63 +223,54 @@ class _ItemChatState extends State<ItemChat> {
         );
       }
       case MessageTypes.Video: {
-        String url = widget.data.getAttachmentUrl().toString();
-        if(videoPlayerController == null){
-          videoPlayerController = VideoPlayerController.networkUrl(Uri.parse(url));
-          videoPlayerController!.initialize().then((_){
-            setState(() {});
-          });
-        }
-        videoPlayerController!.play();
-        videoPlayerController!.setLooping(true);
+        String thumb = widget.data.getAttachmentUrl(getThumbnail: true)?.toString() ?? "";
+        String url = widget.data.getAttachmentUrl()?.toString() ?? "";
 
-        return SizedBox(
-          width: MediaQuery.of(context).size.width * 0.7,
-            child: AspectRatio(
-                    aspectRatio: videoPlayerController!.value.aspectRatio,
-                    child: videoPlayerController!.value.isInitialized
-                        ? VideoPlayer(videoPlayerController!)
-                        : Container(
-                            color: Colors.pink.withOpacity(0.1),
-                            child: const Align(
-                              alignment: Alignment.bottomCenter,
-                              child: LinearProgressIndicator(
-                              ),
-                            ),
-                          ),
+        return GestureDetector(
+          onTap: (){
+            navigateToSlideWidget(
+              context: context,
+              medias: [
+                SlideMedia(url: url, thumb: thumb, type: SlideType.video),
+              ],
+            );
+          },
+          child: Container(
+              color: Colors.pink.withOpacity(0.1),
+              width: MediaQuery.of(context).size.width * 0.7,
+            child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  ImageWidget(
+                    url: url,
+                    hero: url,
                   ),
+                  const Positioned(
+                    top: 10,
+                    right: 10,
+                    child: Icon(Icons.play_circle, color: Colors.white,)
+                  ),
+                ],
+              ),
+          ),
         );
       }
       case MessageTypes.Image: {
           String? url = widget.data.getAttachmentUrl()?.toString();
-          return Container(
-            color: Colors.pink.withOpacity(0.1),
-            width: MediaQuery.of(context).size.width * 0.7,
-            child: url == null 
-                ? const SizedBox(height: 150, child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.error_outline, color: Colors.redAccent,),
-                  Text("Lỗi tải ảnh", style: TextStyle(color: Colors.redAccent, fontSize: 10,)),
+          return GestureDetector(
+            onTap: (){
+              navigateToSlideWidget(
+                context: context,
+                medias: [
+                  SlideMedia(url: url ?? "", type: SlideType.image),
                 ],
-              ),
-            ),)
-                : Image.network(
-                    url, fit: BoxFit.fill,
-                    loadingBuilder: (context, child, loadingProgress) =>
-                    loadingProgress?.cumulativeBytesLoaded
-                    != loadingProgress?.expectedTotalBytes
-                    ? const SizedBox(
-                        height: 150,
-                        child: Align(
-                          alignment: Alignment.bottomCenter,
-                          child: LinearProgressIndicator(
-                          ),
-                        ),
-                      )
-                    : child,
-                  ),
+              );
+            },
+            child: Container(
+              color: Colors.pink.withOpacity(0.1),
+              width: MediaQuery.of(context).size.width * 0.7,
+              child: ImageWidget(url: url ?? "", hero: url,)
+            ),
           );
       }
     }

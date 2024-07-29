@@ -1,4 +1,5 @@
 
+import 'package:ex_sdk_matrix/screen/widget/avatar_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -23,7 +24,7 @@ class _ItemRoomState extends State<ItemRoom> {
   late HomeProvider authProvider = context.read<HomeProvider>();
 
   void _join() async{
-    await authProvider.joinRoom(widget.room);
+    await authProvider.selectRoom(widget.room);
     Navigator.push(context,
       MaterialPageRoute(
         builder: (_) => RoomChatScreen(room: widget.room),
@@ -54,22 +55,13 @@ class _ItemRoomState extends State<ItemRoom> {
         child: Row(
           mainAxisSize: MainAxisSize.max,
           children: [
-            Container(
-              width: 40,
-              height: 40,
-              alignment: Alignment.center,
-              clipBehavior: Clip.hardEdge,
-              decoration: const BoxDecoration(
-                  color: Colors.teal,
-                  borderRadius: BorderRadius.all(Radius.circular(100))
-              ),
-              margin: const EdgeInsetsDirectional.all(10),
-              child: url != null && url.length > 5 == true
-                  ? Image.network(url)
-                  : Text(widget.room.getLocalizedDisplayname().split('').first.toUpperCase(),
-                style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w500),
-              )
+            const SizedBox(width: 10,),
+            AvatarWidget(
+              size: 40,
+              avatarUrl: url ?? "",
+              displayName: widget.room.getLocalizedDisplayname(),
             ),
+            const SizedBox(width: 10,),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

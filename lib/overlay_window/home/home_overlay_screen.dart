@@ -1,3 +1,4 @@
+import 'package:ex_sdk_matrix/screen/widget/avatar_widget.dart';
 import 'package:ex_sdk_matrix/ultis/client_extension.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -53,24 +54,10 @@ class _HomeOverlayScreenState extends State<HomeOverlayScreen> {
                 fontWeight: FontWeight.w500
             ),
           ),
-          leading: Container(
-            width: 30,
-            height: 30,
-            alignment: Alignment.center,
-            clipBehavior: Clip.hardEdge,
-            decoration: const BoxDecoration(
-                color: Colors.teal,
-                borderRadius: BorderRadius.all(Radius.circular(100))
-            ),
-            margin: const EdgeInsetsDirectional.all(10),
-            child: Image.network(
-              homeProvider.profile?.getAvatarUrl(homeProvider.client) ?? "",
-              errorBuilder: (_, __, ___){
-                return Text(homeProvider.profile?.getFirstCharacterDisplayName ?? "",
-                  style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500),
-                );
-              },
-            ),
+          leading: AvatarWidget(
+              size: 30,
+              avatarUrl: homeProvider.profile?.getAvatarUrl(homeProvider.client) ?? "",
+              displayName: homeProvider.profile?.displayName ?? ""
           ),
         ),
         body: Consumer<HomeProvider>(
