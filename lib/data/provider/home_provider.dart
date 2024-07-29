@@ -8,6 +8,7 @@ class HomeProvider extends ChangeNotifier{
   Client _client;
   Profile? _profile;
   List<Room> rooms = [];
+  SearchUserDirectoryResponse? roomSearch;
 
   Client get client => _client;
   Profile? get profile => _profile;
@@ -25,9 +26,26 @@ class HomeProvider extends ChangeNotifier{
     notifyListeners();
   }
 
-  joinRoom(Room room) async{
+  selectRoom(Room room) async{
     if (room.membership != Membership.join) {
       await room.join();
+    }
+  }
+
+  searchRoom(String text, int pageIndex) async{
+    try{
+      roomSearch = await client.searchUserDirectory(text, limit: pageIndex * 10,);
+    }catch(e){
+      roomSearch = null;
+    }
+  }
+
+  Future<Room?> joinRoomSearch(String id) async{
+    try{
+      var roomId = await client.joinRoomById(id);
+      return client.getRoomById(roomId);
+    }catch(e){
+      rethrow;
     }
   }
 }

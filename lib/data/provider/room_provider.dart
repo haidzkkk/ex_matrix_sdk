@@ -1,4 +1,6 @@
 
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:get/get.dart';
@@ -15,10 +17,13 @@ class RoomProvider extends ChangeNotifier {
   Room? _room;
   Timeline? _timeline;
   bool isTyping = false;
+  List<User> members = [];
+  StreamSubscription? _streamMessage;
 
   Client get client => _client;
   Room? get room => _room;
   Timeline? get timeline => _timeline;
+  bool get encrypted => room?.encrypted ?? false;
   set setTyping(bool isTyping) => room?.setTyping(isTyping);
 
   initRoom(Room room) async {
@@ -29,17 +34,31 @@ class RoomProvider extends ChangeNotifier {
       },
       onInsert: (i) async{
         notifyListeners();
+        readMessage();
       },
     );
     notifyListeners();
 
-    _room!.client.onSync.stream.listen((event) async{
+    getMember();
+
+    _streamMessage = _room?.client.onSync.stream.listen((event) async{
       isTyping = _timeline!.room.typingUsers.isNotEmpty;
     });
   }
 
+  getMember() async{
+    members = await room?.requestParticipants() ?? [];
+    print("${members.length}");
+    notifyListeners();
+  }
+
   getMoreMessage() async{
     await _timeline?.requestHistory();
+    notifyListeners();
+  }
+
+  setEncrypted(bool active) async{
+    room?.enableEncryption();
     notifyListeners();
   }
 
@@ -64,6 +83,21 @@ class RoomProvider extends ChangeNotifier {
 
   void sendTextMessage(String strMessage) async{
     await room?.sendTextEvent(strMessage);
+  }
+
+  /// set read all message viewed
+  void readMessage(){
+    room?.setReadMarker(
+        room?.lastEvent?.eventId,
+        mRead: room?.lastEvent?.eventId
+    );
+  }
+
+  /// get room url
+  Uri getRoomUri(){
+    Uri? baseUri = client.baseUri;
+    Uri pathUri = Uri.parse("$baseUri/#/${room?.id}?via=${baseUri?.host}");
+    return pathUri;
   }
 
   /// call video
@@ -95,6 +129,8 @@ class RoomProvider extends ChangeNotifier {
     _room = null;
     _timeline = null;
     isTyping = false;
+    _streamMessage?.cancel();
+    members = [];
   }
 
   /// id to call video

@@ -1,10 +1,12 @@
 
 import 'package:ex_sdk_matrix/screen/search/widget/search_room_item.dart';
+import 'package:ex_sdk_matrix/screen/widget/text_search_custom.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
+import '../../data/provider/home_provider.dart';
 import '../room_chat/room_chat_screen.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -15,23 +17,22 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  late final Client client;
+
+  late HomeProvider homeProvider = context.read<HomeProvider>();
 
   ScrollController scrollCtrl = ScrollController();
   TextEditingController searchTextCtrl = TextEditingController();
   FocusNode searchFocusNode = FocusNode();
 
-  SearchUserDirectoryResponse? data;
   bool isLoading = false;
   bool isLoadingJoin = false;
   int pageIndex = 1;
 
   @override
   void initState() {
-    client = Provider.of<Client>(context, listen: false);
     searchFocusNode.requestFocus();
     scrollCtrl.addListener((){
-      if((data?.results.length ?? 0) > 0
+      if((homeProvider.roomSearch?.results.length ?? 0) > 0
         && scrollCtrl.offset == scrollCtrl.position.maxScrollExtent
       ){
         pageIndex++;
@@ -45,11 +46,7 @@ class _SearchScreenState extends State<SearchScreen> {
   _search() async{
     isLoading = true;
     setState(() {});
-    try{
-      data = await client.searchUserDirectory(searchTextCtrl.text, limit: pageIndex * 10,);
-    }catch(e){
-      data = null;
-    }
+    await homeProvider.searchRoom(searchTextCtrl.text, pageIndex);
     isLoading = false;
     setState(() {});
   }
@@ -59,15 +56,16 @@ class _SearchScreenState extends State<SearchScreen> {
     isLoadingJoin = true;
     setState(() {});
     try{
-      var roomId = await client.joinRoomById(id);
-      Room? room = client.getRoomById(roomId);
-      if(room == null) return;
-
-      Navigator.push(context,
-        MaterialPageRoute(
-          builder: (_) => RoomChatScreen(room: room),
-        ),
-      );
+      Room? room = await homeProvider.joinRoomSearch(id);
+      if(room == null){
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Not found room")));
+      }else{
+        Navigator.push(context,
+          MaterialPageRoute(
+            builder: (_) => RoomChatScreen(room: room),
+          ),
+        );
+      }
     }catch(e){
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
     }
@@ -81,6 +79,7 @@ class _SearchScreenState extends State<SearchScreen> {
     scrollCtrl.dispose();
     searchTextCtrl.dispose();
     searchFocusNode.dispose();
+    homeProvider.roomSearch = null;
   }
 
   @override
@@ -91,26 +90,11 @@ class _SearchScreenState extends State<SearchScreen> {
         surfaceTintColor: Colors.transparent,
         backgroundColor: Colors.white,
         leadingWidth: 40,
-        title: TextField(
-          focusNode: searchFocusNode,
-          controller: searchTextCtrl,
-          cursorColor: Colors.teal,
-          decoration: InputDecoration(
-            suffixIcon: searchTextCtrl.text.isEmpty ? null : IconButton(
-                onPressed: (){
-                  searchTextCtrl.text = "";
-                  pageIndex = 1;
-                  _search();
-                },
-                icon: const Icon(Icons.clear)
-            ),
-            icon: const Icon(Icons.search),
-            hintText: "Name or ID (#example:matrix.org)",
-            focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: Colors.black.withOpacity(0.1)),
-            ),
-          ),
-          onChanged: (value){
+        title: TextSearchCustom(
+          searchFocusNode: searchFocusNode,
+          searchTextCtrl: searchTextCtrl,
+          hint: "Name or ID (#example:matrix.org)",
+          onChange: (value){
             pageIndex = 1;
             _search();
           },
@@ -145,14 +129,14 @@ class _SearchScreenState extends State<SearchScreen> {
                     ],
                   ),
                 ),
-                if((data?.results.length ?? 0) > 0)
+                if((homeProvider.roomSearch?.results.length ?? 0) > 0)
                   RichText(
                     text: TextSpan(children: [
                       const TextSpan(text: "   ROOMS  ", style: TextStyle(color: Colors.black)),
-                      TextSpan(text: "${data?.results.length}", style: const TextStyle(color: Colors.grey)),
+                      TextSpan(text: "${homeProvider.roomSearch?.results.length}", style: const TextStyle(color: Colors.grey)),
                     ]),
                   ),
-                ... data?.results.map((e) => SearchRoomItem(
+                ... homeProvider.roomSearch?.results.map((e) => SearchRoomItem(
                   room: e,
                   onTap: (){
                     _join(e.userId);

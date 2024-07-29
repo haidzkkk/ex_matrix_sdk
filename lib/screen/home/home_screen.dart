@@ -2,6 +2,7 @@
 import 'package:ex_sdk_matrix/data/provider/auth_provider.dart';
 import 'package:ex_sdk_matrix/data/provider/home_provider.dart';
 import 'package:ex_sdk_matrix/screen/home/widget/item_room.dart';
+import 'package:ex_sdk_matrix/screen/widget/avatar_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -103,23 +104,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   expandedHeight: 120,
                   leading: Consumer<HomeProvider>(
                     builder: (context, _, child) {
-                      return Container(
-                        width: 30,
-                        height: 30,
-                        alignment: Alignment.center,
-                        clipBehavior: Clip.hardEdge,
-                        decoration: const BoxDecoration(
-                            color: Colors.teal,
-                            borderRadius: BorderRadius.all(Radius.circular(100))
-                        ),
-                        margin: const EdgeInsetsDirectional.all(10),
-                        child: Image.network(
-                          homeProvider.profile?.getAvatarUrl(homeProvider.client) ?? "",
-                          errorBuilder: (_, __, ___){
-                            return Text(homeProvider.profile?.getFirstCharacterDisplayName ?? "",
-                              style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500),
-                            );
-                          },
+                      return Padding(
+                        padding: const EdgeInsetsDirectional.all(10),
+                        child: AvatarWidget(
+                            size: 10,
+                            avatarUrl: homeProvider.profile?.getAvatarUrl(homeProvider.client) ?? "",
+                            displayName: homeProvider.profile?.displayName ?? ""
                         ),
                       );
                     }

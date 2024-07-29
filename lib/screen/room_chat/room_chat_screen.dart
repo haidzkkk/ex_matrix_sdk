@@ -1,12 +1,15 @@
 
 import 'package:ex_sdk_matrix/data/provider/room_provider.dart';
+import 'package:ex_sdk_matrix/screen/room_wall/room_wall_screen.dart';
 import 'package:ex_sdk_matrix/screen/room_chat/widget/bottom_chat_widget.dart';
 import 'package:ex_sdk_matrix/screen/room_chat/widget/item_chat.dart';
+import 'package:ex_sdk_matrix/ultis/client_extension.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
 import '../../screen/room_call/room_call_screen.dart';
+import '../widget/avatar_widget.dart';
 
 class RoomChatScreen extends StatefulWidget {
   const RoomChatScreen({super.key, required this.room, this.onBack});
@@ -28,7 +31,7 @@ class _RoomChatScreenState extends State<RoomChatScreen> {
   void initState() {
     super.initState();
     roomProvider.initRoom(widget.room);
-
+    roomProvider.readMessage();
     chatScrollController.addListener(() async{
       if(chatScrollController.offset == chatScrollController.position.maxScrollExtent){
         roomProvider.getMoreMessage();
@@ -51,7 +54,6 @@ class _RoomChatScreenState extends State<RoomChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    String imageUrl = widget.room.avatar?.getThumbnail(widget.room.client, width: 56, height: 56,).toString() ?? "";
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -67,36 +69,29 @@ class _RoomChatScreenState extends State<RoomChatScreen> {
             },
             child: const BackButtonIcon()),
         leadingWidth: 30,
-        title: Row(
-          children: [
-            Container(
-              width: 30,
-              height: 30,
-              alignment: Alignment.center,
-              clipBehavior: Clip.hardEdge,
-              decoration: const BoxDecoration(
-                  color: Colors.teal,
-                  borderRadius: BorderRadius.all(Radius.circular(100))
+        title: GestureDetector(
+          onTap: (){
+            Navigator.push(context, MaterialPageRoute(builder: (context) => const RoomWallScreen()));
+          },
+          child: Row(
+            children: [
+              if(roomProvider.room != null)
+                AvatarWidget(
+                    size: 30,
+                    avatarUrl: roomProvider.room!.getAvatarUrl(),
+                    displayName: roomProvider.room!.getLocalizedDisplayname()
+                ),
+              const SizedBox(width: 10,),
+              Expanded(
+                  child: Text(widget.room.getLocalizedDisplayname(),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 16
+                    ),
+                  )
               ),
-              child: Image.network(
-                imageUrl,
-                errorBuilder: (_, __, ___){
-                  return Text(widget.room.getLocalizedDisplayname().split('').first.toUpperCase(),
-                    style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w500),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(width: 10,),
-            Expanded(
-                child: Text(widget.room.getLocalizedDisplayname(),
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 16
-                  ),
-                )
-            ),
-          ],
+            ],
+          ),
         ),
         actions: [
           GestureDetector(
@@ -123,7 +118,12 @@ class _RoomChatScreenState extends State<RoomChatScreen> {
           PopupMenuButton(
               itemBuilder: (context){
                 return [
-                  const PopupMenuItem(child: Text("Setting")),
+                  PopupMenuItem(
+                    child: const Text("Setting"),
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const RoomWallScreen()));
+                    },
+                  ),
                   const PopupMenuItem(child: Text("Invite")),
                   const PopupMenuItem(child: Text("Add Matrix apps")),
                 ];

@@ -1,20 +1,22 @@
-
 import 'package:matrix/matrix.dart';
 
 extension ClientExtension on Client{
 }
 
 extension RoomExtension on Room{
-  String get getAvatarUrl => avatar?.getThumbnail(client, width: 56, height: 56,).toString() ?? "";
+  String getAvatarUrl({double? size}) => avatar?.getThumbnail(client, width: size ?? 56, height: size?? 56,).toString() ?? "";
+  String get getFirstCharacterDisplayName => getLocalizedDisplayname().split('').first.toUpperCase();
+}
+
+extension UserExtension on User{
+  String getAvatarUrl({required Client client, double? size}) => avatarUrl?.getThumbnail(client, width: size ?? 56, height: size ?? 56,).toString() ?? "";
+  bool get isAdmin => !canKick;
 }
 
 extension ProfileExtension on Profile{
-  getAvatarUrl(Client client){
-    return avatarUrl?.getThumbnail(client, width: 56, height: 56,).toString() ?? "";
+  getAvatarUrl(Client client, {double? size}){
+    return avatarUrl?.getThumbnail(client, width: size ?? 56, height: size ?? 56,).toString() ?? "";
   }
-
-  String get getFirstCharacterDisplayName => displayName?.split('').first.toUpperCase() ?? "" "";
-
 }
 
 extension EventStatusExtension on EventStatus{
@@ -31,7 +33,6 @@ extension EventStatusExtension on EventStatus{
       case EventStatus.roomState:
         return "Trạng thái phòng";
     }
-    return "";
   }
 }
 

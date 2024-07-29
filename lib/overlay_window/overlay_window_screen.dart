@@ -1,5 +1,5 @@
 import 'package:ex_sdk_matrix/data/provider/auth_provider.dart';
-import 'package:ex_sdk_matrix/overlay_window/home/widget/avatar_widget.dart';
+import 'package:ex_sdk_matrix/overlay_window/home/widget/avatar_overlay_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -49,7 +49,7 @@ class _OverlayWindowScreenState extends State<OverlayWindowScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const AvatarWidget(),
+          const AvatarOverlayWidget(),
           if(isExpanded)
             const Expanded(child: HomeOverlayScreen())
         ],
